@@ -16,7 +16,7 @@ class NetworkRepositoryMhs(
             firestore.collection ("Mahasiswa").add (mahasiswa) .await ()
 
         } catch (e: Exception) {
-            throw Exception ("Gagal menambahkan data mahasiswa:$ {e.message} ")
+            throw Exception ("Gagal Menambahkan data Mahasiswa:  ${e.message}")
         }
     }
 
@@ -40,8 +40,17 @@ class NetworkRepositoryMhs(
         }
     }
 
-    override fun getMhs(nim: String): Flow<Mahasiswa> {
-        TODO("Not yet implemented")
+    override fun getMhs(nim: String): Flow<Mahasiswa> = callbackFlow {
+        val mhsDocumented = firestore.collection("Mahasiswa")
+            .document(nim)
+            .addSnapshotListener{value, error ->
+                if (value != null) {
+                    val mhs = value.toObject(Mahasiswa::class.java)!!
+                }
+            }
+        awaitClose{
+            mhsDocumented.remove()
+        }
     }
 
     override suspend fun deleteMhs(mahasiswa: Mahasiswa) {
