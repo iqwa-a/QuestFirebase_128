@@ -178,3 +178,75 @@ fun InserBodyMhs (
         }
     }
 }
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun InsertMhsView(
+    onBack: () -> Unit,
+    onNavigate: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: InsertViewModel = viewModel(factory = PenyediaViewModel.Factory)
+) {
+    val uiState = viewModel.uiState
+    val uiEvent = viewModel.uiEvent
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope =  rememberCoroutineScope()
+
+    LaunchedEffect (uiState) {
+        when (uiState) {
+            is FormState.Success -> {
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar(
+                        uiState.message,
+                    )
+                }
+                delay(700)
+                onNavigate()
+                viewModel.resetSnackBarMessage()
+            }
+
+            is FormState.Error -> {
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar(
+                        uiState.message,
+                    )
+                }
+            }
+            else -> Unit
+        }
+    }
+
+    Scaffold (
+        modifier = modifier,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        topBar = {
+            TopAppBar(
+                title = { Text("Insert Mahasiswa") },
+                navigationIcon = {
+                    Button (onClick = onBack){
+                        Text("Back")
+                    }
+                }
+            )
+        }
+    ) { paddding ->
+        Column (
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddding)
+                .padding(16.dp)
+        ){
+            InserBodyMhs (
+                uiState = uiEvent,
+                homeUiState = uiState,
+                onValueChange = { updatedEvennt ->
+                    viewModel.updateUiEvent(updatedEvennt)
+                },
+                onClick = {
+                    if (viewModel.validateFields()) {
+                        viewModel.insertMhs()
+                    }
+                }
+            )
+        }
+    }
+}
