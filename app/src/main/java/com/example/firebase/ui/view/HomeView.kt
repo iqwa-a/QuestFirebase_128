@@ -82,7 +82,7 @@ fun CardMhs(
     mhs: Mahasiswa,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = { },
-    onDeleteClick: (String) -> Unit = {}
+    onDeleteClick: (Mahasiswa) -> Unit = {}
 ) {
     Card(
         onClick = onClick,
@@ -118,7 +118,9 @@ fun CardMhs(
                 )
                 Spacer(modifier = Modifier.padding(4.dp))
                 IconButton(
-                    onClick = { onDeleteClick(mhs.nim) }
+                    onClick = { onDeleteClick(mhs)
+                        Log.d("CardMhs", "Mhs berhasil dihapus: $mhs")
+                    }
                 ) {
                     Icon(imageVector = Icons.Filled.Delete, contentDescription = "")
                 }
@@ -154,7 +156,7 @@ fun ListMahasiswa(
                 CardMhs(
                     mhs = mhs,
                     onClick = { onClick(mhs.nim) },
-                    onDeleteClick = { onDeleteClick(mhs) }
+                    onDeleteClick = { onDeleteClick(it) }
                 )
             }
         )
@@ -207,7 +209,9 @@ fun HomeStatus (
             ListMahasiswa(
                 listMhs = homeUiState.data,
                 onClick = { onDetailClick(it) },
-                onDeleteClick = { onDeleteClick(it) }
+                onDeleteClick = {
+                    deleteConfirmationRequired = it
+                }
             )
             deleteConfirmationRequired?.let { data ->
                 DeleteConfirmationDialog(
@@ -258,8 +262,7 @@ fun HomeScreen(
             retryAction = {viewModel.getMhs()},modifier = Modifier.padding(innerPadding),
             onDetailClick = onDetailClick,
             onDeleteClick = {
-                viewModel.deleteMhs(it.nim)
-                viewModel.getMhs()
+                viewModel.deleteMhs(it)
             }
         )
     }
