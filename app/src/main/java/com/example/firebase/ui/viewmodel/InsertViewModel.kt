@@ -39,3 +39,25 @@ data class FormErrorState (
         return nim == null && nama == null && gender == null && alamat == null && kelas == null && angkatan == null
     }
 }
+data class InsertUiState(
+    val insertUiEvent: MahasiswaEvent = MahasiswaEvent(),
+    val isEntryValid: FormErrorState = FormErrorState()
+)
+
+sealed class FormState {
+    object Idle : FormState()
+    object Loading : FormState()
+    data class Success(val message: String) : FormState()
+    data class Error(val message: String) : FormState()
+}
+
+class InsertViewModel (
+    private val mhs: RepositoryMhs
+): ViewModel() {
+
+    var uiEvent: InsertUiState by mutableStateOf(InsertUiState())
+        private set
+
+    var uiState: FormState by mutableStateOf(FormState.Idle)
+        private set
+}
